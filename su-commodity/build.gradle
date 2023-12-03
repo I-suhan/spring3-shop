@@ -1,0 +1,10 @@
+dependencies {
+    implementation project(':su-core')
+}
+bootJar{
+    enabled=false
+}
+
+jar{
+    enabled=true
+}

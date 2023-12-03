@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- 标准log4j2.xml配置文件加载得太早,spring无法在其中使用扩展 -->
+<!-- 日志等级 All < Trace < Debug < Info < Warn < Error < Fatal < OFF-->
+<!-- Status配置WARN后 Log4j2本身只打印WARN以上的日志  减去了很多Log4j2本身的Info日志(这个status不是为了限制用户的打印)-->
+<Configuration status="warn" strict="true" monitorInterval="30">
+    <Properties>
+        <Property name="app_name">${spring:spring.application.name}</Property>
+        <Property name="log_path">D:/logs</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- 控制台输出 appender，SYSTEM_OUT输出黑色，SYSTEM_ERR输出红色 -->
+        <Console name="ConsoleAppend" target="SYSTEM_OUT">
+            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            <!--<PatternLayout pattern="%d %highlight{%-5level}{ERROR=Bright RED, WARN=Bright Yellow, INFO=Bright Green, DEBUG=Bright Cyan, TRACE=Bright White} %style{[%t]}{bright,magenta} %style{%c{1.}.%M(%L)}{cyan}: %msg%n"/>-->
+            <PatternLayout pattern="%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %highlight{%-5level}{ERROR=Bright RED, WARN=Bright Yellow, INFO=Bright Green, DEBUG=Bright Cyan, TRACE=Bright White} %style{[${app_name}]}{fg_#FFB6C1 bright} %style{[%t]}{bright,#4682B4} %style{%logger{3}}{#98FB98} - %msg%n"/>
+        </Console>
+
+        <!-- 日志文件输出 appender -->
+        <File name="FileAppend" fileName="${log_path}/xml_config.log" bufferedIO="true" immediateFlush="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </File>
+
+        <!-- 这个会打印出所有的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
+        <RollingFile name="RollingFile" fileName="logs/app.log"
+                     filePattern="log/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} %-5level %class{36} %L %M - %msg%xEx%n"/>
+            <SizeBasedTriggeringPolicy size="50MB"/>
+            <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件，这里设置了20 -->
+            <DefaultRolloverStrategy max="20"/>
+        </RollingFile>
+
+    </Appenders>
+    <Loggers>
+        <Logger name="java.sql.Connection" level="debug" additivity="false">
+            <AppenderRef ref="ConsoleAppend"/>
+        </Logger>
+        <Logger name="java.sql.Statement" level="debug" additivity="false">
+            <AppenderRef ref="ConsoleAppend"/>
+        </Logger>
+        <Logger name="java.sql.PreparedStatement" level="debug" additivity="false">
+            <AppenderRef ref="ConsoleAppend"/>
+        </Logger>
+
+        <Root level="trace">
+            <AppenderRef ref="ConsoleAppend"/>
+            <AppenderRef ref="FileAppend"/>
+        </Root>
+    </Loggers>
+</Configuration>

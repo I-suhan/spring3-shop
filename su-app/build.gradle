@@ -1,0 +1,13 @@
+dependencies {
+    implementation project(':su-core')
+    implementation project(':su-commodity')
+    implementation project(':su-consumer')
+    implementation project(':su-order')
+}
+bootJar{
+    enabled=false
+}
+
+jar{
+    enabled=true
+}
